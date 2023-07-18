@@ -1,0 +1,83 @@
+service: aws-node-graphql-api-dynamodb-typescript
+
+frameworkVersion: '3'
+
+custom:
+  tableName: 'AlarmTable-${self:provider.stage}'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+  region: us-east-1
+  stage: Dev
+  iam:
+    role: IamRoleForLambda
+  environment:
+    Table_Name: ${self:custom.tableName}
+
+functions:
+  graphql:
+    handler: src/handler.graphqlHandler
+    role: IamRoleForLambda
+    events:
+      - http:
+          path: /graphql
+          method: post
+          cors: true
+
+plugins:
+  - serverless-offline
+  - serverless-plugin-typescript
+
+resources:
+  Resources:
+    IamRoleForLambda:
+      Type: AWS::IAM::Role
+      Properties:
+        RoleName: ${self:service}-${self:provider.stage}-role
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: 'Allow'
+              Principal:
+                Service: 'lambda.amazonaws.com'
+              Action: 'sts:AssumeRole'
+        Policies:
+          - PolicyName: DynamoDBAccessPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:PutItem
+                    - dynamodb:GetItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:UpdateItem
+                  Resource:
+                    - !Sub ${AlarmTable.Arn}
+          - PolicyName: CloudWatchLogPolicy
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                  Resource:
+                    - '*'
+    AlarmTable:
+      Type: 'AWS::DynamoDB::Table'
+      Properties:
+        AttributeDefinitions:
+          - AttributeName: siteId
+            AttributeType: S
+        KeySchema:
+          - AttributeName: siteId
+            KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        TableName: ${self:custom.tableName}

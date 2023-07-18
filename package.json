@@ -1,0 +1,27 @@
+{
+  "name": "graphql-api-dynamodb",
+  "version": "1.0.0",
+  "description": "graphql-api",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "dev": "serverless offline",
+    "deploy": "serverless deploy"
+  },
+  "author": "",
+  "license": "ISC",
+  "devDependencies": {
+    "serverless-offline": "^12.0.4",
+    "serverless-plugin-typescript": "^2.1.5",
+    "typescript": "^5.1.6"
+  },
+  "dependencies": {
+    "@tsconfig/node16": "^16.1.0",
+    "apollo-server-lambda": "^3.12.0",
+    "aws-sdk": "^2.1410.0",
+    "dotenv": "^16.3.1",
+    "graphql": "^16.7.1",
+    "graphql-server-lambda": "^1.4.1",
+    "graphql-tools": "^9.0.0"
+  }
+}
